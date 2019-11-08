@@ -1,0 +1,26 @@
+{
+  "name": "archiveapi",
+  "version": "1.0.0",
+  "description": "ArchiveAPI",
+  "main": "index.js",
+  "scripts": {
+    "test": "FirstAPI"
+  },
+  "author": "Selva",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dateformat": "^3.0.3",
+    "express": "^4.17.1",
+    "helmet": "^3.21.2",
+    "http": "0.0.0",
+    "mysql": "^2.17.1",
+    "mysql-import": "^3.0.6",
+    "node-file-logger": "^0.9.5",
+    "qs": "^6.9.0",
+    "request": "^2.88.0",
+    "simple-node-logger": "^18.12.23",
+    "winston": "^3.2.1"
+  }
+}

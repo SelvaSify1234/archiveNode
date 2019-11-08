@@ -1,0 +1,9 @@
+19:50:50.680 INFO  subscription to channel accepted at 2019-11-07T14:20:50.679Z 
+19:50:50.705 INFO  logs/dbarchive_2019-50-07.log Log file has created ! 
+19:50:54.734 INFO  Source Database Connection Check Start.. 
+19:50:54.879 INFO  Destination Database Connection Check Start.. 
+19:50:54.901 INFO  Destination Database Connected Successfully. 
+19:50:54.911 ERROR Destination table not createdER_EMPTY_QUERY: Query was empty 
+19:50:54.918 INFO  Source Database Connected Successfully. 
+19:50:54.922 ERROR Source Database Select Table error some service  
+19:50:54.928 ERROR Source Database Select Table error some service  

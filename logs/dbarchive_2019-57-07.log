@@ -1,0 +1,7 @@
+12:57:47.206 INFO  subscription to channel accepted at 2019-11-07T07:27:47.205Z 
+12:57:47.246 INFO  logs/dbarchive_2019-57-07.log Log file has created ! 
+12:57:51.878 INFO  Source Database Connection Check Start.. 
+12:57:52.164 INFO  Destination Database Connection Check Start.. 
+12:57:52.272 INFO  Destination Database Connected Successfully. 
+12:57:52.285 ERROR Destination table not created 
+12:57:52.295 INFO  Source Database Connected Successfully. 
