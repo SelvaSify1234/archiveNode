@@ -98,8 +98,8 @@ app.use(bodyParser.urlencoded({extended : true}));
           }
           else{
            // response ('Some Reasone Data Archive has been NOT Done.');
-         log.info('Data Archive has been done.');
-         response ('Data Archive has been done.');
+        //  log.info('Data Archive has been done.');
+        //  response ('Data Archive has been done.');
           }
         }
       )

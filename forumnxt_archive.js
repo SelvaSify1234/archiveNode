@@ -143,7 +143,7 @@ async function table_exists(conn,name)
      function get_table_columns(conn,sour_table)
      {
         return new Promise((rs,rj)=>{
-               var sql= 'SELECT COLUMN_NAME  FROM information_schema.columns WHERE table_name ="' +sour_table+ '" ';
+               var sql= 'SELECT COLUMN_NAME  FROM information_schema.columns WHERE table_name ="' +sour_table+ '"  ORDER BY ORDINAL_POSITION';
             conn.query(sql,function(err,rslt,fields){
                 if(err || !rslt){
                     rj(new Error(`Error while get columns names from source table...`+err.message));
@@ -151,6 +151,7 @@ async function table_exists(conn,name)
                     }
                 else{
 
+                    console.log(rslt);
                     for(var i=0; i< rslt.length;i++)
                     {
                      if(i < rslt.length-1)
@@ -207,6 +208,7 @@ async function table_exists(conn,name)
                 values.push([result[i].salesinvoiceid, result[i].cf_salesinvoice_sales_invoice_date,result[i].status]);
                 }
       
+                console.log(sql);
              dest_con.query(sql, [values], function (err, result) {
               if(err || !result){
                   rj(new Error(`Error while import data to destination table.` +err.message));
@@ -235,11 +237,12 @@ async function table_exists(conn,name)
              var query= replaceAll(query,";","");
         var sql = "INSERT INTO " +dest_db+"."+dest_table+ " ("+query+") ";
         dest_con.query(sql, function (err, result, fields) {
-     if(err || !result){
+     if(err || !result)
+      {
         rj(new Error(`Error while get data from source table..`));
         return false;
-        }
-    else{      rs(true);     }
+      }
+      else{      rs(true);     }
       
          });
       });
