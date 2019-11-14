@@ -1,6 +1,0 @@
-12:12:20.879 INFO  subscription to channel accepted at 2019-11-07T06:42:20.879Z 
-12:12:20.968 INFO  logs/dbarchive_2019-12-07.log Log file has created ! 
-12:12:23.199 INFO  Source Database Connection Check Start.. 
-12:12:23.373 INFO  Destination Database Connection Check Start.. 
-12:12:23.397 INFO  Source Database Connected Successfully. 
-12:12:23.407 INFO  Destination Database Connected Successfully. 

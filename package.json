@@ -2,7 +2,7 @@
   "name": "archiveapi",
   "version": "1.0.0",
   "description": "ArchiveAPI",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "FirstAPI"
   },

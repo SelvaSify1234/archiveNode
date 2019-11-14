@@ -1,7 +1,0 @@
-19:49:14.415 INFO  subscription to channel accepted at 2019-11-07T14:19:14.415Z 
-19:49:14.440 INFO  logs/dbarchive_2019-49-07.log Log file has created ! 
-19:49:18.711 INFO  Source Database Connection Check Start.. 
-19:49:19.034 INFO  Destination Database Connection Check Start.. 
-19:49:19.077 INFO  Source Database Connected Successfully. 
-19:49:19.090 INFO  Destination Database Connected Successfully. 
-19:49:19.119 ERROR Destination table not createdER_EMPTY_QUERY: Query was empty 

@@ -1,7 +1,0 @@
-12:07:04.729 INFO  subscription to channel accepted at 2019-11-07T06:37:04.729Z 
-12:07:04.754 INFO  logs/dbarchive_2019-07-07.log Log file has created ! 
-12:07:07.139 INFO  Source Database Connection Check Start.. 
-12:07:07.294 INFO  Destination Database Connection Check Start.. 
-12:07:07.312 INFO  Source Database Connected Successfully. 
-12:07:07.318 INFO  Destination Database Connected Successfully. 
-12:07:07.326 ERROR Destination table not created 

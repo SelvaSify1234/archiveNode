@@ -1,8 +1,0 @@
-19:27:52.186 INFO  subscription to channel accepted at 2019-11-07T13:57:52.186Z 
-19:27:52.210 INFO  logs/dbarchive_2019-27-07.log Log file has created ! 
-19:27:58.390 INFO  Source Database Connection Check Start.. 
-19:27:58.542 INFO  Destination Database Connection Check Start.. 
-19:27:58.562 INFO  Destination Database Connected Successfully. 
-19:27:58.575 INFO  Destination table has been created successfully..  
-19:27:58.577 INFO  Source Database Connected Successfully. 
-19:27:58.580 ERROR Destination Data Not Inserted  On Destination Table 
