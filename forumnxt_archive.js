@@ -4,12 +4,14 @@ var del_query;
 var sour_table;
 var dest_table;
 var insert_columns;
+var tbl_columns;
 
 function do_archive(sour_con,dest_con,create_table,module_name,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port)
 {
     return get_sales_data(sour_con,module_name,sour_db).then(status =>{
        var p$;
-        if(status){
+        if(status)
+        {
             return table_exists(dest_con,dest_table)
             .then( stat => {
                 var p$;
@@ -21,7 +23,6 @@ function do_archive(sour_con,dest_con,create_table,module_name,sour_db,dest_db,s
                             {  return  delete_data(sour_con,del_query); }
                         }
                     )
-                    //p$=Promise.resolve(true);
                 }
         else if(create_table){
              return table_exists(dest_con,dest_table)
@@ -35,7 +36,6 @@ function do_archive(sour_con,dest_con,create_table,module_name,sour_db,dest_db,s
                             {  return  delete_data(sour_con,del_query); }
                         }
                      )
-                    //p$=Promise.resolve(true);
                 }
                 else{
                     p$=get_table_schema(sour_con,sour_table,dest_table)
@@ -51,7 +51,6 @@ function do_archive(sour_con,dest_con,create_table,module_name,sour_db,dest_db,s
                                         {  return  delete_data(sour_con,del_query); }
                                     }
                                 )
-                                //p$=Promise.resolve(true);
                             }
                         });                        
                     });
@@ -59,15 +58,16 @@ function do_archive(sour_con,dest_con,create_table,module_name,sour_db,dest_db,s
             });
           }
      else{
-             log.error('Table doesnt exists in dest. Also create table NOT enabled.');
-             p$=Promise.reject(new Error('Table doesnt exists in dest. Also create table NOT enabled.'));
+             log.error('Table dose not exists in destination database . Also create table not enabled.');
+             p$=Promise.reject(new Error('Table dose not exists in destination database . Also create table not enabled.'));
+             return false;
          }
-                p$=Promise.reject(new Error('Archive has been completed.'));
-            });
+           });
         }
         else{
-             log.error('Table doesnt exists in dest. Also create table NOT enabled.');
-            p$=Promise.reject(new Error('Table doesnt exists in dest. Also create table NOT enabled.'));
+             log.error('Table dose not exists in destination database . Also create table not enabled.');
+            p$=Promise.reject(new Error('Table dose not exists in destination database . Also create table not enabled.'));
+            return false;
         }
     });    
 }
@@ -88,20 +88,17 @@ async function get_sales_data(sour_con,name,sour_db)
             {
                 sel_query =  result[i]['sel_query'];
                 del_query =  result[i]['del_query'];
-        
-                sour_table =   sel_query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
+               sour_table =   sel_query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
                sour_table = sour_table.substring(0,sour_table.indexOf("WHERE"));
                sour_table = sour_table.replace(/\s/g, "");
                 dest_table = sour_table;
                dest_table = dest_table+'_archival';
-                //sel_query = sel_query.replace('/'+sour_table+'/g',  sour_db  +'.'+sour_table);
-                //del_query = del_query.replace(/'"+sour_table+"'/g',  sour_db  +'.'+sour_table);
             }    
            rs(true);
         }
        else{
-            rj(new Error('Module Name is not valide. Module Name data not exist. '));
-            return false;
+             rj(new Error('Module Name is not valide. Module Name data not exist. '));
+             return false;
           }        
       }      
     });
@@ -152,6 +149,7 @@ async function table_exists(conn,name)
                 else{
 
                     console.log(rslt);
+                    tbl_columns=rslt;
                     for(var i=0; i< rslt.length;i++)
                     {
                      if(i < rslt.length-1)
@@ -170,7 +168,7 @@ async function table_exists(conn,name)
     }
     
 
-    function import_table_schema(conn,schema)
+function import_table_schema(conn,schema)
     {
         return new Promise((rs,rj)=>{
             conn.query(schema,function(err,results,fields){
@@ -187,7 +185,7 @@ async function table_exists(conn,name)
   function import_table_data(sour_con,dest_con,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port)
 { 
     /*  Source and destination host and port is different */
-    if(sour_host != dest_host && sour_port != dest_port )
+    if(sour_host == dest_host && sour_port == dest_port )
     {
      return new Promise((rs,rj)=>{
     sour_con.query(sel_query, function (err, result, fields) {
@@ -203,12 +201,15 @@ async function table_exists(conn,name)
          {  
         if(result && result.length>0) {
             var sql = "INSERT INTO " +dest_table+ " ("+insert_columns+") VALUES ?";
-            var values = [];
+            var values=[];
             for (var i = 0; i < result.length; i++) {
-                values.push([result[i].salesinvoiceid, result[i].cf_salesinvoice_sales_invoice_date,result[i].status]);
+                var temp_values = [];
+              for(var j=0;j< tbl_columns.length;j++)
+                {
+                    temp_values.push(result[i][tbl_columns[j]['COLUMN_NAME']]);
                 }
-      
-                console.log(sql);
+               values.push(temp_values);  
+            }
              dest_con.query(sql, [values], function (err, result) {
               if(err || !result){
                   rj(new Error(`Error while import data to destination table.` +err.message));
