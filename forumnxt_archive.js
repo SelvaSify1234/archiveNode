@@ -1,125 +1,79 @@
 var log = require('./log');
-var sel_query;
-var del_query;
-var sour_table;
-var dest_table;
 var insert_columns;
 var tbl_columns;
 
-function do_archive(sour_con,dest_con,create_table,module_name,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port)
+async function do_archive(sour_con,dest_con,create_table,module_name,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port,sour_table,dest_table,sel_query,del_query,sequence)
 {
-    return get_sales_data(sour_con,module_name,sour_db).then(status =>{
-       var p$;
-        if(status)
-        {
-            return table_exists(dest_con,dest_table)
+        return new Promise((rs,rj)=>{
+            return table_exists(dest_con,dest_db,dest_table)
             .then( stat => {
-                var p$;
-                if(stat){
-                    return import_table_data(sour_con,dest_con,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port)
+        if(stat){
+                    return import_table_data(sour_con,dest_con,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port,sour_table,dest_table,sel_query)
                     .then(rslt=>{
                             var p$;
                             if(rslt)
-                            {  return  delete_data(sour_con,del_query); }
+                            {   rs(delete_data(sour_con, del_query, sequence, module_name, sour_db)); }
                         }
                     )
                 }
-        else if(create_table){
-             return table_exists(dest_con,dest_table)
-              .then( stat => {
-                var p$;
-                if(stat){
-                    return import_table_data(sour_con,dest_con,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port)
-                    .then(rslt=>{
-                            var p$;
-                            if(rslt)
-                            {  return  delete_data(sour_con,del_query); }
-                        }
-                     )
-                }
-                else{
-                    p$=get_table_schema(sour_con,sour_table,dest_table)
+        else if(create_table){            
+                    return get_table_schema(sour_con,sour_table,dest_table)
                     .then(schema => {
                         return import_table_schema(dest_con,schema)
                         .then( stat => {
                             var p$;
                             if(stat){
-                                return import_table_data(sour_con,dest_con,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port)
+                                return import_table_data(sour_con,dest_con,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port,sour_table,dest_table,sel_query)
                                 .then(rslt=>{
                                         var p$;
                                         if(rslt)
-                                        {  return  delete_data(sour_con,del_query); }
+                                        {    rs(  delete_data(sour_con,del_query,sequence,module_name,sour_db)); }
+                                        else{
+                                            rj(new Error(`No data available for selected Select Module Name...` ));
+                                            return false;
+                                           }
                                     }
                                 )
                             }
                         });                        
                     });
-                }
-            });
+              //  }
+            //});
           }
      else{
              log.error('Table dose not exists in destination database . Also create table not enabled.');
-             p$=Promise.reject(new Error('Table dose not exists in destination database . Also create table not enabled.'));
+            // p$=Promise.reject(new Error('Table dose not exists in destination database . Also create table not enabled.'));
+            rj(new Error('Table dose not exists in destination database . Also create table not enabled.'));
              return false;
          }
            });
-        }
-        else{
-             log.error('Table dose not exists in destination database . Also create table not enabled.');
-            p$=Promise.reject(new Error('Table dose not exists in destination database . Also create table not enabled.'));
-            return false;
-        }
+        // }
+        // else{
+        //      log.error('Table dose not exists in destination database . Also create table not enabled.');
+        //     p$=Promise.reject(new Error('Table dose not exists in destination database . Also create table not enabled.'));
+        //     return false;
+        // }
+   // });
     });    
 }
 
-async function get_sales_data(sour_con,name,sour_db)
-{
-    return new Promise((rs,rj)=>{
-   var sql  ='select * from sify_darc_modules_query where module_name="'+ name  +'"  order by sequence asc';
-   sour_con.query(sql, function(err,result,fields){
-   if(err || !result)
-    { rj(new Error('Source Database Select Table error ','some service ',+ err.message));
-      return false;
-    }   
-    else{
-        if(result.length>0)
-        { 
-            for(var i=0; i < result.length; i++)
-            {
-                sel_query =  result[i]['sel_query'];
-                del_query =  result[i]['del_query'];
-               sour_table =   sel_query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
-               sour_table = sour_table.substring(0,sour_table.indexOf("WHERE"));
-               sour_table = sour_table.replace(/\s/g, "");
-                dest_table = sour_table;
-               dest_table = dest_table+'_archival';
-            }    
-           rs(true);
-        }
-       else{
-             rj(new Error('Module Name is not valide. Module Name data not exist. '));
-             return false;
-          }        
-      }      
-    });
-  });
-}
 
 
-async function table_exists(conn,name)
+async function table_exists(conn,dest_db,name)
 {
-    return new Promise((rs,rj)=>{
-        conn.query('SHOW TABLES LIKE ?',[name],function(err,results,fields){
+  var sql=`SELECT count(*) FROM information_schema.tables WHERE table_schema = '${dest_db}' AND table_name = '${name}'`;
+      return new Promise((rs,rj)=>{
+       conn.query(sql,function(err,results,fields){
             if(err){
                 rj(new Error('Error while getting info about table.'));
                 return false;
             }
-            if(results.length==0){ rs(false); }
-            else{ rs(true);    }
+            if(results[0]['count(*)']==0){ rs(false); }
+            else{  rs(true);    }
         });
     });
 }
-     function get_table_schema(conn,name,dest_table)
+async function get_table_schema(conn,name,dest_table)
      {
         return new Promise((rs,rj)=>{
             conn.query(`SHOW CREATE TABLE ${name}`,function(err,results,fields){
@@ -137,18 +91,17 @@ async function table_exists(conn,name)
         });
     }
 
-     function get_table_columns(conn,sour_table)
+async function get_table_columns(conn,sour_db,sour_table)
      {
         return new Promise((rs,rj)=>{
-               var sql= 'SELECT COLUMN_NAME  FROM information_schema.columns WHERE table_name ="' +sour_table+ '"  ORDER BY ORDINAL_POSITION';
+               var sql= 'SELECT COLUMN_NAME  FROM information_schema.columns WHERE table_name ="' +sour_table+ '" AND table_schema ="' +sour_db+ '"   ORDER BY ORDINAL_POSITION';
             conn.query(sql,function(err,rslt,fields){
                 if(err || !rslt){
                     rj(new Error(`Error while get columns names from source table...`+err.message));
                         return false  ;
                     }
                 else{
-
-                    console.log(rslt);
+                   
                     tbl_columns=rslt;
                     for(var i=0; i< rslt.length;i++)
                     {
@@ -168,13 +121,18 @@ async function table_exists(conn,name)
     }
     
 
-function import_table_schema(conn,schema)
+    async function import_table_schema(conn,schema)
     {
         return new Promise((rs,rj)=>{
             conn.query(schema,function(err,results,fields){
                 if(err || !results){
-                    rj(new Error(`Error while creating new table. `+err.message));
-                     return false ;
+                    if( err.message.indexOf('ER_TABLE_EXISTS_ERROR:') >= 0){
+                        rs(true);
+                      }
+                      else{
+                        rj(new Error(`Error while creating new table. `+err.message));
+                        return false ;
+                      }                  
                 }
                 else{ rs(true);}
             });
@@ -182,7 +140,7 @@ function import_table_schema(conn,schema)
     }
 
 
-  function import_table_data(sour_con,dest_con,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port)
+  function import_table_data(sour_con,dest_con,sour_db,dest_db,sour_host,dest_host,sour_port,dest_port,sour_table,dest_table,sel_query)
 { 
     /*  Source and destination host and port is different */
     if(sour_host == dest_host && sour_port == dest_port )
@@ -194,7 +152,7 @@ function import_table_schema(conn,schema)
         return false;
     }
     else{
-        return get_table_columns(sour_con,sour_table)
+        return get_table_columns(sour_con,sour_db,sour_table)
         .then(rslt=>{
          var p$;
          if(rslt)
@@ -234,9 +192,10 @@ function import_table_schema(conn,schema)
  else{
          return new Promise((rs,rj)=>{
              var tbl=sour_db+"."+sour_table;
-             var query= replaceAll(sel_query,sour_table,tbl);
-             var query= replaceAll(query,";","");
+            var query= replaceAll(sel_query,sour_table,tbl);
+          //  var query= replaceAll(query,";","");
         var sql = "INSERT INTO " +dest_db+"."+dest_table+ " ("+query+") ";
+       // console.log(sql);
         dest_con.query(sql, function (err, result, fields) {
      if(err || !result)
       {
@@ -251,7 +210,7 @@ function import_table_schema(conn,schema)
 }  
 
 
-function delete_data(conn,del_query)
+function delete_data(conn,del_query,sequence,module_name,sour_db)
 {
     return new Promise((rs,rj)=>{
         conn.query(del_query,function(err,results,fields){
@@ -261,10 +220,13 @@ function delete_data(conn,del_query)
               }
             else{
                 log.info('Number of records deleted: ' + results.affectedRows);
-                 p$=Promise.reject(new Error('Number of records deleted : ' + results.affectedRows));
-                rs(true);
+                log.log_entry(conn,sequence,module_name,'1',sour_db);
+                 rs(true);
              }
         });
+    }).then(sat=>{
+        console.log('hello : ',sat);
+        return sat;
     });
 }
 
@@ -275,5 +237,5 @@ function replaceAll(originalString, find, replace)
 
   
 module.exports= {
-    do_archive,get_sales_data,table_exists
+    do_archive,table_exists
     }

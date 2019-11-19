@@ -9,6 +9,7 @@
   "author": "Selva",
   "license": "ISC",
   "dependencies": {
+    "async-foreach": "^0.1.3",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dateformat": "^3.0.3",
@@ -17,6 +18,7 @@
     "http": "0.0.0",
     "mysql": "^2.17.1",
     "mysql-import": "^3.0.6",
+    "node-datetime": "^2.1.2",
     "node-file-logger": "^0.9.5",
     "qs": "^6.9.0",
     "request": "^2.88.0",
