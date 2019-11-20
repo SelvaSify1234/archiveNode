@@ -37,7 +37,7 @@ module.exports = {
   return new Promise((rs,rj)=>
   {
     var dt = datetime.create();
-    var formatted = dt.format('Y-m-d');
+    var formatted = dt.format('Y-m-d:H:M:S');
   
     var sql  =`insert into ${sour_db}.archival_status_log values(${sequence},'${module_name}',${status},'${formatted}')`;
    

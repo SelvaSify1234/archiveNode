@@ -29,6 +29,7 @@ var del_query;
 var sour_table;
 var dest_table;
 var sequence;
+var post=0;
 
 var app = express();
 app.use(bodyParser.json());
@@ -42,7 +43,7 @@ app.use(bodyParser.urlencoded({extended : true}));
 /* Archive Data Post Call*/
   app.post('/db/archive-manual',function(req,res,next)
   {
-
+    console.log('Testing');
     log.create_log();
 
    dbkeys =Object.keys(req.body.database_config);
@@ -52,8 +53,8 @@ app.use(bodyParser.urlencoded({extended : true}));
        eval(key+ " = req.body['database_config'][dbkeys][key]");
       }
 
-  sour_con = mysql.createConnection({    host:mysql_source_host,  user: mysql_source_username,  password:mysql_source_password,database: mysql_source_database});
-    
+  sour_con = mysql.createConnection({ host:mysql_source_host,  user: mysql_source_username,  password:mysql_source_password,database: mysql_source_database});
+  dest_con = mysql.createConnection({host: mysql_destination_host,user: mysql_destination_username, password:mysql_destination_password, database: mysql_destination_database  });  
    customer_type = customer_type;
    sour_host = mysql_source_host;
    dest_host=mysql_destination_host;
@@ -66,34 +67,35 @@ app.use(bodyParser.urlencoded({extended : true}));
   
    sour_con.connect(function(err) {
        if (err !=null) 
-       {log.info('Source Database Not Connected . Please make sure Source Database configuration valid.');
-         response('Source Database Not Connected . Please make sure Source Database configuration valid.');}
+       {log.info('Source database not connected !.. Please make sure source database configuration valid.');
+         response('Source database not connected !.. Please make sure source database configuration valid.');}
        else
-       {  log.info('Source Database Connected Successfully.');    }
+       {  log.info('Source database connected successfully.');    }
     });
-
-    dest_con =mysql.createConnection({host: mysql_destination_host,user: mysql_destination_username, password:mysql_destination_password, database: mysql_destination_database  });
+    
 
     dest_con.connect(function(err) {
         if (err !=null) 
-        {log.error('Destination Database Not Connected !.. Please make sure Destination Details  ');
-        response('Destination Database Not Connected !.. Please Make sure Destination Details  ');}
+        {log.error('Destination database not connected !.. Please make sure destination Details  ');
+        response('Destination database not connected !.. Please Make sure destination Details  ');}
         else
-        {          log.info('Destination Database Connected Successfully.');        }
+        {          log.info('Destination database connected successfully.');        }
     });
     /* Archive Data For FourmNXT Type */ 
-    if(customer_type=='1')
+
+
+    if(customer_type=='1' )
     {
 
-       get_sales_data(sour_con,module_name,sour_db).then(result =>{
+    get_sales_data(sour_con,module_name,sour_db).then(result =>{
+       
     if(result.length>0)
      {
-
       forEach(result, function(item, index, arr) 
         {
             sel_query =  item['sel_query'];
             del_query =  item['del_query'];
-            sequence  =  item['sequence'];
+            sequence  =  item['vt_tabid'];
             sour_table =   sel_query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
             sour_table = sour_table.substring(0,sour_table.indexOf("WHERE"));
             sour_table = sour_table.replace(/\s/g, "");
@@ -106,41 +108,55 @@ app.use(bodyParser.urlencoded({extended : true}));
                 log.info('Data Archive has been done.');
                        //if(index== result.length-1)
                        //{ response ('Data Archive has been done.'); }
-                       response ('Data Archive has been done.');
+                    response (' Data archive process has been completed.');
                }
                else{
-                response ('Some Reasone Data Archive has been NOT Done.');
-               log.info('Some Reasone Data Archive has been NOT Done.');
+               // response ('Some Reasone Data Archive has been NOT Done.');
+               log.info('Some reasone data archive has been NOT Done.');
               //  res.setHeader('Content-Type', 'application/json');
               //  res.send({message: 'Data Archive has been done.' });
               //  res.end;
           }
         })
       .catch(err=>{
+       
          log.error('\n----------------------\n');
          log.error(err.message);
          log.error('\n----------------------\n');
-         response (err.message);
+         post=1;
+          response (err.message);
+          console.log(post);       
          log.log_entry(sour_con,sequence,module_name,'2',sour_db);
          
         })
-      .finally( _ => 
-        {
-           // sour_con.end();
-          //dest_con.end();
-      });
-   });  
-
+   }); 
 }
 
 })
 .catch(err=>{
+  post=1;
+
  log.error('\n----------------------\n');
  log.error(err.message);
  log.error('\n----------------------\n');
- response (err.message);
+ response (err.message); 
+ console.log(post); 
  log.log_entry(sour_con,sequence,module_name,'2',sour_db);
  
+})
+.finally( _ => 
+  {
+ //  console.log(post);  
+ //   if(post==0)
+ //   {
+  //    console.log('finally');
+  //    console.log(post);
+  //    response (' Data archive process has been completed.');
+  //    posts=0;
+  //  }
+   
+     // sour_con.end();
+    //dest_con.end();
 });
    
  }
@@ -150,7 +166,6 @@ app.use(bodyParser.urlencoded({extended : true}));
 
 
    
-    
 
 function response (message)
 {
@@ -167,7 +182,7 @@ async function get_sales_data(sour_con,name,sour_db)
    var sql  ='select * from sify_darc_modules_query where module_name="'+ name  +'"  order by sequence asc';
    sour_con.query(sql, function(err,result,fields){
    if(err || !result)
-    { rj(new Error('Source Database Select Table error ','some service ',+ err.message));
+    { rj(new Error('Source database select table error ','some service ',+ err.message));
       return false;
     }   
     else{
@@ -176,7 +191,7 @@ async function get_sales_data(sour_con,name,sour_db)
        else{
              rj(new Error('Module Name is not valide. Module Name data not exist. '));
              log.info('Module Name is not valide. Module Name data not exist');
-                          return false;
+              return false;
           }        
       }      
     });
