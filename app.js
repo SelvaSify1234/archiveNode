@@ -43,9 +43,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 /* Archive Data Post Call*/
 app.post('/db/archive-manual', function(req, res, next) {
-    console.log('Testing');
+    
     log.create_log();
-
     dbkeys = Object.keys(req.body.database_config);
 
     for (var key in req.body['database_config'][dbkeys]) {
@@ -91,8 +90,13 @@ app.post('/db/archive-manual', function(req, res, next) {
                                             if (stat) 
                                             {
                                                 log.info('Data Archive has been done.');                                                
-                                                msg = ' Data archive process has been completed.';
-                                                // return;
+                                               
+                                                 if(index == result.length-1)
+                                                  {
+                                                  res.setHeader('Content-Type', 'application/json');
+                                                  res.send({ message: 'Data archive process has been completed.' });
+                                                  res.end();
+                                                  }
 
                                             } else {
                                                 log.info('Some reasone data archive has been NOT Done.');
@@ -100,65 +104,50 @@ app.post('/db/archive-manual', function(req, res, next) {
                                             }
                                         })
                                         .catch(err => {
-                                            console.log('Do Archive');
                                             log.error('\n----------------------\n');
-                                            msg = err.message;
+                                            msg += 'Module Name : '+ module_name +' Row No :'+ index + 'Error :'+ err.message;
                                             log.error(err.message);
                                             log.error('\n----------------------\n');
                                             
-                                            console.log('Do Archive Msg :', msg);
                                             log.log_entry(sour_con, sequence, module_name, '2', sour_db);
-
+                                          if(err.message != null && index == result.length-1)
+                                          {
+                                           res.setHeader('Content-Type', 'application/json');
+                                            res.send({ message: msg });
+                                             res.end();
+                                             msg='';
+                                          }
                                         });
                                 });
                             }
                         })
                         .catch(err => {
                             post = 1;
-                            console.log('Get data');
                             log.error('\n----------------------\n');
                             log.error(err.message);
-                            msg = err.message;
                             log.error('\n----------------------\n');
-                            console.log('Get data catch Msg :', msg);
-                            
                             if (sequence != 0)
                                 log.log_entry(sour_con, sequence, module_name, '2', sour_db);
-
-                        })
-                        .finally(_ => {
-                          console.log('Get data finally');
-                            if (msg == '') { msg = 'Data archive process has been completed.'; }
                             res.setHeader('Content-Type', 'application/json');
-                            res.send({ message: msg });
-                            res.end();
-                        });
+                            res.send({ message: err.message });
+                            res.end();                          
+                        })
+                        // .finally(_ => {
+                        //   console.log('Get data finally');
+                        //    });
 
                 } else { /* Archive Data For Others Type */ }
             }
         })
         .catch(err => {
-            console.log('Do Archive1 catch msg:');
             log.error('\n----------------------\n');
             log.error(err.message);
-            msg=err.message;
             log.error('\n----------------------\n');
-            //post=0;
             res.setHeader('Content-Type', 'application/json');
-            res.send({ message: msg });
+            res.send({ message: err.message });
             res.end();
-            msg='';
-
         });
-
-    // function response (message)
-    //  {
-    //   res.setHeader('Content-Type', 'application/json');
-    //   res.send({message: message });
-    //   res.end();
-    //  }   
-
-});
+   });
 
 
 async function get_sales_data(sour_con, name, sour_db) {

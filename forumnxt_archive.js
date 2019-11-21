@@ -25,9 +25,9 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                                     var p$;
                                     if (stat) {
                                         return import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query)
-                                            .then(resolvelt => {
+                                            .then(resolve => {
                                                 var p$;
-                                                if (resolvelt) {
+                                                if (resolve) {
                                                     resolve(delete_data(sour_con, del_query, sequence, module_name, sour_db));
                                                 } else {
                                                     reject(new Error(`No data available for selected Select Module Name...`));
@@ -84,21 +84,21 @@ async function get_table_schema(conn, name, dest_table) {
 async function get_table_columns(conn, sour_db, sour_table) {
     return new Promise((resolve, reject) => {
         var sql = 'SELECT COLUMN_NAME  FROM information_schema.columns WHERE table_name ="' + sour_table + '" AND table_schema ="' + sour_db + '"   ORDER BY ORDINAL_POSITION';
-        conn.query(sql, function(err, resolvelt, fields) {
-            if (err || !resolvelt) {
+        conn.query(sql, function(err, resolve, fields) {
+            if (err || !resolve) {
                 reject(new Error(`Error while get columns names from source table...` + err.message));
                 return false;
             } else {
 
-                tbl_columns = resolvelt;
-                for (var i = 0; i < resolvelt.length; i++) {
-                    if (i < resolvelt.length - 1) {
+                tbl_columns = resolve;
+                for (var i = 0; i < resolve.length; i++) {
+                    if (i < resolve.length - 1) {
                         if (i == 0)
-                            insert_columns = resolvelt[i]['COLUMN_NAME'] + ',';
+                            insert_columns = resolve[i]['COLUMN_NAME'] + ',';
                         else
-                            insert_columns += resolvelt[i]['COLUMN_NAME'] + ',';
+                            insert_columns += resolve[i]['COLUMN_NAME'] + ',';
                     } else
-                        insert_columns += resolvelt[i]['COLUMN_NAME'];
+                        insert_columns += resolve[i]['COLUMN_NAME'];
                 }
                 resolve(true);
             }
@@ -135,8 +135,8 @@ function import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest
                     return false;
                 } else {
                     return get_table_columns(sour_con, sour_db, sour_table)
-                        .then(resolvelt => {
-                            if (resolvelt) {
+                        .then(resolve => {
+                            if (resolve) {
                                 if (result && result.length > 0) {
                                     var sql = "INSERT INTO " + dest_table + " (" + insert_columns + ") VALUES ?";
                                     var values = [];
@@ -173,9 +173,7 @@ function import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest
             var query = replaceAll(sel_query, sour_table, tbl);
             var sql = "INSERT INTO " + dest_db + "." + dest_table + " (" + query + ") ";
             dest_con.query(sql, function(err, result, fields) {
-                 if (err) {
-                    console.log(err.message);
-                    console.log(result);
+                 if (err) {                  
                     reject(new Error(`Error while get data from source table..`));
                 } else {
                     resolve(true);
