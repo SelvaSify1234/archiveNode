@@ -25,9 +25,9 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                                     var p$;
                                     if (stat) {
                                         return import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query)
-                                            .then(resolve => {
+                                            .then(rst => {
                                                 var p$;
-                                                if (resolve) {
+                                                if (rst) {
                                                     resolve(delete_data(sour_con, del_query, sequence, module_name, sour_db));
                                                 } else {
                                                     reject(new Error(`No data available for selected Select Module Name...`));
