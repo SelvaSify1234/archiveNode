@@ -26,7 +26,6 @@ module.exports = {
         //create a logger file
         console.log('create a logger file');
         log = require('simple-node-logger').createSimpleLogger(file_name);
-
         log.info('subscription to ', 'channel', ' accepted at .. ', new Date().toJSON());
         return true;
     },
