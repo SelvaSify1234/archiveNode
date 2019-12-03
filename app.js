@@ -77,14 +77,12 @@ app.post('/db/archive-manual', function (req, res, next) {
                 if (customer_type == '1' && sour_con.state == 'authenticated' && dest_con.state == 'authenticated') {
                     get_sales_data(sour_con, module_name, sour_db)
                         .then(result => {
-                              console.log(result);
                             if (result.length > 0) {
                                 forEach(result, function (item, index, arr) {
-                                    sel_query = item['sel_query'];
-                                    del_query = item['del_query'];
+                                    sel_query = item['sel_query_template'];
+                                    del_query = item['del_query_template'];
                                     sequence = item['vt_tabid'];
 
-                                    console.log(sel_query);
                                     sour_table = sel_query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
                                     sour_table = sour_table.substring(0, sour_table.indexOf("WHERE"));
                                     sour_table = sour_table.replace(/\s/g, "");
@@ -154,7 +152,6 @@ app.post('/db/archive-manual', function (req, res, next) {
 async function get_sales_data(sour_con, name, sour_db) {
     return new Promise((rs, rj) => {
         var sql = 'select * from sify_darc_modules_query where module_name="' + name + '"  order by sequence asc';
-        console.log(sql);
         sour_con.query(sql, function (err, result, fields) {
             if (err || !result.length > 0) {
                 rj(new Error('Module Name is not valid. Module Name data not exist. '));
@@ -173,18 +170,15 @@ async function source_conn(sour_con, dest_con) {
     return new Promise((rs, rj) => {
         sour_con.connect(function (err, result) {
             if (err != null) {
-                console.log(err.message);
                 rj(new Error('Source database not connected !.. Please make sure source database configuration is valid.'));
-                return false;
-                
+                return false;                
             }
             else {
                 log.info('Source database connected successfully.');
                 dest_con.connect(function (err) {
                     if (err != null) {
                         rj(new Error('Destination database not connected !.. Please make sure source database configuration is valid.'));
-                        return false;
-                        
+                        return false;                        
                     }
                     else {
                         log.info('Destination database connected successfully.');
