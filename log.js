@@ -35,10 +35,11 @@ module.exports = {
             var dt = datetime.create();
             var formatted = dt.format('Y-m-d:H:M:S');
 
-            var sql = `insert into ${sour_db}.archival_status_log values(${sequence},'${module_name}',${status},'${formatted}')`;
+            var sql = `insert into ${sour_db}.archival_status_log (vt_tabid,module_name,status,process_date) values(${sequence},'${module_name}',${status},'${formatted}')`;
 
             conn.query(sql, function (err, result, fields) {
                 if (err || !result) {
+                    console.log(err);
                     rj(new Error('Log entry error ', 'some service ', +err.message));
                     return false;
                 }

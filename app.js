@@ -134,6 +134,7 @@ app.post('/db/archive-manual', function (req, res, next) {
                 }
                 else {
                     /* Archive Data For Others Type */
+
                 }
             }
         })
@@ -168,6 +169,7 @@ async function source_conn(sour_con, dest_con) {
     return new Promise((rs, rj) => {
         sour_con.connect(function (err, result) {
             if (err != null) {
+                console.log(err.message);
                 rj(new Error('Source database not connected !.. Please make sure source database configuration is valid.'));
                 return false;
                 
