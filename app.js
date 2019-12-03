@@ -154,6 +154,7 @@ app.post('/db/archive-manual', function (req, res, next) {
 async function get_sales_data(sour_con, name, sour_db) {
     return new Promise((rs, rj) => {
         var sql = 'select * from sify_darc_modules_query where module_name="' + name + '"  order by sequence asc';
+        console.log(sql);
         sour_con.query(sql, function (err, result, fields) {
             if (err || !result.length > 0) {
                 rj(new Error('Module Name is not valid. Module Name data not exist. '));
