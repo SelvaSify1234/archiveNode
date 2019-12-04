@@ -10,18 +10,17 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                         .then(result => {
                             if (result) {
                                 resolve(delete_data(sour_con, del_query, sequence, module_name, sour_db));
-                            }
-                            else {
+                            } else {
                                 reject(new Error(`Selected Module name do not have data to archival.`));
                                 return false;
                             }
-                        }).catch(err => {
-                             log.error(err.message);
-                             reject(new Error(err.message));
-                             return false;
-                       });
-                }
-                else if (create_table) {
+                        })
+                        .catch(err => {
+                            log.error(err.message);
+                            reject(new Error(err.message));
+                            return false;
+                        });
+                } else if (create_table) {
                     return get_table_schema(sour_con, sour_table, dest_table)
                         .then(schema => {
                             return import_table_schema(dest_con, schema)
@@ -31,31 +30,30 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                                             .then(rst => {
                                                 if (rst) {
                                                     resolve(delete_data(sour_con, del_query, sequence, module_name, sour_db));
-                                                }
-                                                else {
+                                                } else {
                                                     reject(new Error(`Selected Module name do not have data to archival.`));
                                                     return false;
                                                 }
-                                            }).catch(err => {
+                                            })
+                                            .catch(err => {
                                                 log.error(err.message);
                                                 reject(new Error(err.message));
                                                 return false;
-                                        });
+                                            });
                                     }
                                 })
                                 .catch(err => {
-                                  log.error(err.message);
-                                  reject(new Error(err.message));
-                                  return false;
-                           });
+                                    log.error(err.message);
+                                    reject(new Error(err.message));
+                                    return false;
+                                });
                         })
                         .catch(err => {
                             log.error(err.message);
                             reject(new Error(err.message));
                             return false;
                         });
-                }
-                else {
+                } else {
                     log.error('Table dose not exists in destination database . Also create table not enabled.');
                     reject(new Error('Table dose not exists in destination database . Also create table not enabled.'));
                     return false;
@@ -73,8 +71,7 @@ async function table_exists(conn, dest_db, name) {
             }
             if (results[0]['count(*)'] == 0) {
                 resolve(false);
-            }
-            else {
+            } else {
                 resolve(true);
             }
         });
@@ -84,12 +81,12 @@ async function get_table_schema(conn, name, dest_table) {
     return new Promise((resolve, reject) => {
         conn.query(`SHOW CREATE TABLE ${name}`, function (err, results, fields) {
             if (err) {
-                reject(new Error(`Error while getting the "${name}" schema.. Err Msg :`+err.message));
+                reject(new Error(`Error while getting the "${name}" schema.. Err Msg :` + err.message));
                 return false;
             }
             var schema = (results.length > 0 && results[0] && results[0]['Create Table']) || null;
             if (!schema) {
-                reject(new Error(`Error while getting the "${name}" schema.. Err Msg :`+err.message));
+                reject(new Error(`Error while getting the "${name}" schema.. Err Msg :` + err.message));
                 return false;
             }
             resolve(schema = schema.replace(name, dest_table));
@@ -103,8 +100,7 @@ async function get_table_columns(conn, sour_db, sour_table) {
             if (err || !result) {
                 reject(new Error(`Error while get columns names from source table...` + err.message));
                 return false;
-            }
-            else {
+            } else {
                 tbl_columns = result;
                 for (var i = 0; i < result.length; i++) {
                     if (i < result.length - 1) {
@@ -112,8 +108,7 @@ async function get_table_columns(conn, sour_db, sour_table) {
                             insert_columns = result[i]['COLUMN_NAME'] + ',';
                         else
                             insert_columns += result[i]['COLUMN_NAME'] + ',';
-                    }
-                    else
+                    } else
                         insert_columns += result[i]['COLUMN_NAME'];
                 }
                 resolve(true);
@@ -127,13 +122,11 @@ async function import_table_schema(conn, schema) {
             if (err || !results) {
                 if (err.message.indexOf('ER_TABLE_EXISTS_ERROR:') >= 0) {
                     resolve(true);
-                }
-                else {
+                } else {
                     reject(new Error(`Error while creating new table no destination database. Err Msg : ` + err.message));
                     return false;
                 }
-            }
-            else {
+            } else {
                 resolve(true);
             }
         });
@@ -142,17 +135,16 @@ async function import_table_schema(conn, schema) {
 
 function import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query) {
     /* If Source & Destination host and port is different */
-    if (sour_host != dest_host && sour_port != dest_port) {
+    if (sour_host == dest_host && sour_port == dest_port) {
         return new Promise((resolve, reject) => {
             sour_con.query(sel_query, function (err, result, fields) {
                 if (err || !result) {
-                    reject(new Error(`Error while import data to destination table. Err Msg : ` + err.message));
+                    reject(new Error(`Error while get data from source table. Err Msg : ` + err.message));
                     return false;
-                }
-                else {
+                } else {
                     return get_table_columns(sour_con, sour_db, sour_table)
-                        .then(resolve => {
-                            if (resolve) {
+                        .then(rst => {
+                            if (rst) {
                                 if (result && result.length > 0) {
                                     var sql = "INSERT INTO " + dest_table + " (" + insert_columns + ") VALUES ?";
                                     var values = [];
@@ -167,14 +159,12 @@ function import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest
                                         if (err || !result) {
                                             reject(new Error(`Error while import data to destination table. Err Msg: ` + err.message));
                                             return false;
-                                        }
-                                        else {
+                                        } else {
                                             log.info('Number of records inserted: ' + result.affectedRows);
                                             resolve(true);
                                         }
                                     });
-                                }
-                                else {
+                                } else {
                                     reject(new Error(`Selected Module name do not have data to archival.`));
                                     return false;
                                 }
@@ -193,8 +183,7 @@ function import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest
             dest_con.query(sql, function (err, result, fields) {
                 if (err) {
                     reject(new Error(`Error while import data to destination table. Err Msg : ` + err.message));
-                }
-                else {
+                } else {
                     resolve(true);
                 }
             });
@@ -206,10 +195,9 @@ function delete_data(conn, del_query, sequence, module_name, sour_db) {
     return new Promise((resolve, reject) => {
         conn.query(del_query, function (err, results, fields) {
             if (err || !results) {
-                reject(new Error(`Error while delete source table data. Err Msg : ` +err.message ));
+                reject(new Error(`Error while delete source table data. Err Msg : ` + err.message));
                 return false;
-            }
-            else {
+            } else {
                 log.info('Number of records deleted: ' + results.affectedRows);
                 log.log_entry(conn, sequence, module_name, '1', sour_db);
                 resolve(true);
@@ -222,5 +210,5 @@ function replaceAll(originalString, find, replace) {
     return originalString.replace(new RegExp(find, 'g'), replace);
 }
 module.exports = {
-    do_archive, table_exists
+    do_archive , table_exists
 }

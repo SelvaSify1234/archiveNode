@@ -39,14 +39,14 @@ app.use(bodyParser.urlencoded({
 
 /* Archive Data Post Call*/
 app.post('/db/archive-manual', function (req, res, next) {
-    
+
     log.create_log();
     dbkeys = Object.keys(req.body.database_config);
-    
+
     for (var key in req.body['database_config'][dbkeys]) {
         eval(key + " = req.body['database_config'][dbkeys][key]");
     }
-    
+
     sour_con = mysql.createConnection({
         host: mysql_source_host
         , user: mysql_source_username
@@ -68,12 +68,12 @@ app.post('/db/archive-manual', function (req, res, next) {
     dest_port = mysql_destination_port;
     create_table = create_dest_table_if_not_exists;
     module_name = mysql_select_module;
-    
+
     source_conn(sour_con, dest_con)
         .then(rst => {
-            
+
             if (rst) {
-                
+
                 if (customer_type == '1' && sour_con.state == 'authenticated' && dest_con.state == 'authenticated') {
                     get_sales_data(sour_con, module_name, sour_db)
                         .then(result => {
@@ -84,23 +84,24 @@ app.post('/db/archive-manual', function (req, res, next) {
                                     sequence = item['vt_tabid'];
 
                                     sour_table = sel_query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
-                                    sour_table = sour_table.substring(0, sour_table.indexOf("WHERE"));
                                     sour_table = sour_table.replace(/\s/g, "");
+                                    sel_query = sel_query.replace(";", "");
                                     dest_table = sour_table + '_archival';
-                                    
+
                                     /* Do Archive */
                                     archive.do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, sequence)
                                         .then(stat => {
                                             if (stat) {
                                                 log.info('Data Archive has been done.');
-                                                
+
                                                 if (index == result.length - 1) {
                                                     res.setHeader('Content-Type', 'application/json');
-                                                    res.send({message: 'Data archival process has been completed.' });
+                                                    res.send({
+                                                        message: 'Data archival process has been completed.'
+                                                    });
                                                     res.end();
-                                                }                                                
-                                            }
-                                            else {
+                                                }
+                                            } else {
                                                 log.info('Some reasone data archival has been NOT Done.');
                                                 msg = 'Some reasone data archival has been NOT Done.';
                                             }
@@ -110,11 +111,13 @@ app.post('/db/archive-manual', function (req, res, next) {
                                             msg += ' Row No :' + index + '  ' + err.message;
                                             log.error(err.message);
                                             log.error('\n----------------------\n');
-                                            
+
                                             log.log_entry(sour_con, sequence, module_name, '2', sour_db);
                                             if (err.message != null && index == result.length - 1) {
                                                 res.setHeader('Content-Type', 'application/json');
-                                                res.send({ message: msg });
+                                                res.send({
+                                                    message: msg
+                                                });
                                                 res.end();
                                                 msg = '';
                                             }
@@ -129,11 +132,12 @@ app.post('/db/archive-manual', function (req, res, next) {
                             if (sequence != 0)
                                 log.log_entry(sour_con, sequence, module_name, '2', sour_db);
                             res.setHeader('Content-Type', 'application/json');
-                            res.send({ message: err.message });
+                            res.send({
+                                message: err.message
+                            });
                             res.end();
-                        })                    
-                }
-                else {
+                        })
+                } else {
                     /* Archive Data For Others Type */
 
                 }
@@ -144,7 +148,9 @@ app.post('/db/archive-manual', function (req, res, next) {
             log.error(err.message);
             log.error('\n----------------------\n');
             res.setHeader('Content-Type', 'application/json');
-            res.send({message: err.message});
+            res.send({
+                message: err.message
+            });
             res.end();
         });
 });
@@ -157,8 +163,7 @@ async function get_sales_data(sour_con, name, sour_db) {
                 rj(new Error('Module Name is not valid. Module Name data not exist. '));
                 log.info('Module Name is not valid. Module Name data not exist');
                 return false;
-            }
-            else {
+            } else {
                 if (result.length > 0)
                     rs(result);
             }
@@ -171,16 +176,14 @@ async function source_conn(sour_con, dest_con) {
         sour_con.connect(function (err, result) {
             if (err != null) {
                 rj(new Error('Source database not connected !.. Please make sure source database configuration is valid.'));
-                return false;                
-            }
-            else {
+                return false;
+            } else {
                 log.info('Source database connected successfully.');
                 dest_con.connect(function (err) {
                     if (err != null) {
                         rj(new Error('Destination database not connected !.. Please make sure source database configuration is valid.'));
-                        return false;                        
-                    }
-                    else {
+                        return false;
+                    } else {
                         log.info('Destination database connected successfully.');
                         rs(true);
                     }
