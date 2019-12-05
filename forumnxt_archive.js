@@ -89,8 +89,22 @@ async function get_table_schema(conn, name, dest_table) {
                 reject(new Error(`Error while getting the "${name}" schema.. Err Msg :` + err.message));
                 return false;
             }
-            resolve(schema = schema.replace(name, dest_table));
+            else{
+                if(schema.indexOf('CONSTRAINT') != -1 || schema.indexOf('constraint') != -1)
+                {
+                   var  foreign_key = schema.match(new RegExp('CONSTRAINT' + "(.*)" + 'FOREIGN KEY'));
+                    for_key = foreign_key[1].replace(/\s/g, "");
+                    for_key = for_key.replace(/`/gi, "");
+                    schema = schema.replace(for_key, for_key+'_archive');
+                    schema = schema.replace(name, dest_table);
+                    resolve(schema);
+                 }
+             else{
+                    resolve(schema = schema.replace(name, dest_table));
+                }
+            }           
         });
+
     });
 }
 async function get_table_columns(conn, sour_db, sour_table) {
