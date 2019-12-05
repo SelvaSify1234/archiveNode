@@ -95,7 +95,7 @@ async function get_table_schema(conn, name, dest_table) {
                    var  foreign_key = schema.match(new RegExp('CONSTRAINT' + "(.*)" + 'FOREIGN KEY'));
                     for_key = foreign_key[1].replace(/\s/g, "");
                     for_key = for_key.replace(/`/gi, "");
-                    schema = schema.replace(for_key, for_key+'_archive');
+                    schema = schema.replace(for_key, for_key+'_archival');
                     schema = schema.replace(name, dest_table);
                     resolve(schema);
                  }
