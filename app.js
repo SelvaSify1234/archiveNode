@@ -78,6 +78,7 @@ app.post('/db/archive-manual', function (req, res, next) {
                     get_sales_data(sour_con, module_name, sour_db)
                         .then(result => {
                             if (result.length > 0) {
+                                  msg = '';
                                 forEach(result, function (item, index, arr) {
                                     sel_query = item['sel_query_template'];
                                     del_query = item['del_query_template'];
