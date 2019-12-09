@@ -97,7 +97,6 @@ async function get_table_schema(conn, name, dest_table) {
                     for_key = for_key.replace(/`/gi, "");
                     schema = schema.replace(for_key, for_key+'_archival');
                     schema = schema.replace(name, dest_table);
-                    console.log(schema);
                     resolve(schema);
                  }
              else{

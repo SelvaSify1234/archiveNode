@@ -109,12 +109,10 @@ app.post('/db/archive-manual', function (req, res, next) {
                                             }
                                         })
                                         .catch(err => {
-                                            console.log(msg);
                                             log.error('\n----------------------\n');
                                             msg += ' Row No :' + index + '  ' + err.message;
                                             log.error(err.message);
                                             log.error('\n----------------------\n');
-                                            console.log(msg);
                                             log.log_entry(sour_con, sequence, module_name, '2', sour_db);
                                             if (err.message != null && index == result.length - 1) {
                                                 res.setHeader('Content-Type', 'application/json');
