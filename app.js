@@ -102,17 +102,19 @@ app.post('/db/archive-manual', function (req, res, next) {
                                                     });
                                                     res.end();
                                                 }
-                                            } else {
+                                            }
+                                            else {
                                                 log.info('Some reasone data archival has been NOT Done.');
                                                 msg = 'Some reasone data archival has been NOT Done.';
                                             }
                                         })
                                         .catch(err => {
+                                            console.log(msg);
                                             log.error('\n----------------------\n');
                                             msg += ' Row No :' + index + '  ' + err.message;
                                             log.error(err.message);
                                             log.error('\n----------------------\n');
-
+                                            console.log(msg);
                                             log.log_entry(sour_con, sequence, module_name, '2', sour_db);
                                             if (err.message != null && index == result.length - 1) {
                                                 res.setHeader('Content-Type', 'application/json');
@@ -140,7 +142,7 @@ app.post('/db/archive-manual', function (req, res, next) {
                         })
                 } else {
                     /* Archive Data For Others Type */
-
+                    console.log('Othe Momdule Type');
                 }
             }
         })
