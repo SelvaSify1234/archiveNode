@@ -16,6 +16,7 @@
     "express": "^4.17.1",
     "helmet": "^3.21.2",
     "http": "0.0.0",
+    "lower-case": "^2.0.1",
     "mysql": "^2.17.1",
     "mysql-import": "^3.0.6",
     "node-datetime": "^2.1.2",
