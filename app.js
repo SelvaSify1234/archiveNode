@@ -8,7 +8,6 @@ var archive = require('./forumnxt_archive');
 var archive_others = require('./others_archive');
 var log = require('./log');
 var forEach = require('async-foreach').forEach;
-var lc = require('lower-case');
 
 var sour_host;
 var sour_port;
