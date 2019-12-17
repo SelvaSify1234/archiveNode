@@ -110,7 +110,7 @@ app.post('/db/archive-manual', function (req, res, next) {
                       msg += ' Row No :' + index + '  ' + err.message;
                       log.error(err.message);
                       log.error('\n----------------------\n');
-                      log.log_entry(sour_con, sequence, module_name, '2', sour_db);
+                      log.log_entry(sour_con, sequence, module_name, '2', sour_db,null,null);
                       if (err.message != null && index == result.length - 1) {
                         res.setHeader('Content-Type', 'application/json');
                         res.send({ message: msg });
@@ -125,7 +125,7 @@ app.post('/db/archive-manual', function (req, res, next) {
               log.error('\n----------------------\n');
               log.error(err.message);
               log.error('\n----------------------\n');
-              if (sequence != 0) log.log_entry(sour_con, sequence, module_name, '2', sour_db);
+              if (sequence != 0) log.log_entry(sour_con, sequence, module_name, '2', sour_db,null,null);
               res.setHeader('Content-Type', 'application/json');
               res.send({ message: err.message });
               res.end();
@@ -166,7 +166,7 @@ app.post('/db/archive-manual', function (req, res, next) {
                 msg += ' Row No :' + index + '  ' + err.message;
                 log.error(err.message);
                 log.error('\n----------------------\n');
-                  log.log_entry(sour_con, 0, sour_table, '2', sour_db);
+                  log.log_entry(sour_con, 0, sour_table, '2', sour_db,null,null);
                 if (err.message != null && index == tblkeys.length - 1) {
                   res.setHeader('Content-Type', 'application/json');
                   res.send({ message: msg });
@@ -188,20 +188,6 @@ app.post('/db/archive-manual', function (req, res, next) {
     });
 });
 
-async function get_sales_data(sour_con, name, sour_db) {
-  return new Promise((rs, rj) => {
-    var sql = 'select * from sify_darc_modules_query where module_name="' + name + '"  order by sequence asc';
-    sour_con.query(sql, function (err, result, fields) {
-      if (err || !result.length > 0) {
-        rj(new Error('Module Name is not valid. Module Name data not exist. '));
-        log.info('Module Name is not valid. Module Name data not exist');
-        return false;
-      } else {
-        if (result.length > 0) rs(result);
-      }
-    });
-  });
-}
 
 async function source_conn(sour_con, dest_con) {
   return new Promise((rs, rj) => {
@@ -224,5 +210,21 @@ async function source_conn(sour_con, dest_con) {
     });
   });
 }
+
+async function get_sales_data(sour_con, name, sour_db) {
+  return new Promise((rs, rj) => {
+    var sql = 'select * from sify_darc_modules_query where module_name="' + name + '"  order by sequence asc';
+    sour_con.query(sql, function (err, result, fields) {
+      if (err || !result.length > 0) {
+        rj(new Error('Module Name is not valid. Module Name data not exist. '));
+        log.info('Module Name is not valid. Module Name data not exist');
+        return false;
+      } else {
+        if (result.length > 0) rs(result);
+      }
+    });
+  });
+}
+
 app.listen(3000, () => {});
 module.exports = app;

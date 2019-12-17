@@ -2,6 +2,8 @@ var log = require('./log');
 var common = require('./common');
 var insert_columns;
 var tbl_columns;
+global.sel_duration='';
+
 async function do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, sequence) {
     return new Promise((resolve, reject) => {
         return common.table_exists(dest_con, dest_db, dest_table)
@@ -10,7 +12,7 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                     return import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query)
                         .then(result => {
                             if (result) {
-                                resolve(common.delete_data(sour_con, del_query, sequence, module_name, sour_db));
+                                resolve(common.delete_data(sour_con, del_query, sequence, module_name, sour_db,sel_duration));
                             } else {
                                 reject(new Error(`Selected Module name do not have data to archival.`));
                                 return false;
@@ -30,7 +32,7 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                                         return import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query)
                                             .then(rst => {
                                                 if (rst) {
-                                                    resolve(common.delete_data(sour_con, del_query, sequence, module_name, sour_db));
+                                                    resolve(common.delete_data(sour_con, del_query, sequence, module_name, sour_db,sel_duration));
                                                 } else {
                                                     reject(new Error(`Selected Module name do not have data to archival.`));
                                                     return false;
@@ -92,11 +94,17 @@ async function get_table_columns(conn, sour_db, sour_table) {
     /* If Source & Destination host and port is different */
     if (sour_host == dest_host && sour_port == dest_port) {
         return new Promise((resolve, reject) => {
+            var pre_query = new Date().getTime();
             sour_con.query(sel_query, function (err, result, fields) {
+                     /* Query Execution Time Check */
+                     var post_query = new Date().getTime();
+                     sel_duration='';
+                     sel_duration = (post_query - pre_query) / 1000;
+
                 if (err || !result) {
                     reject(new Error(`Error while get data from source table. Err Msg : ` + err.message));
                     return false;
-                } else {
+                } else {                                         
                     return get_table_columns(sour_con, sour_db, sour_table)
                         .then(rst => {
                             if (rst) {

@@ -1,4 +1,5 @@
 var log = require('./log');
+var del_duration;
 
 async function table_exists(conn, dest_db, name) {
     var sql = `SELECT count(*) FROM information_schema.tables WHERE table_schema = '${dest_db}' AND table_name = '${name}'`;
@@ -66,15 +67,20 @@ async function import_table_schema(conn, schema) {
     });
 }
 
-function delete_data(conn, del_query, sequence, module_name, sour_db) {
+function delete_data(conn, del_query, sequence, module_name, sour_db,sel_duration) {
     return new Promise((resolve, reject) => {
+    	var pre_query = new Date().getTime();
         conn.query(del_query, function (err, results, fields) {
+        	
+        	var post_query = new Date().getTime();
+        	    del_duration = (post_query - pre_query) / 1000;
+
             if (err || !results) {
                 reject(new Error(`Error while delete source table data. Err Msg : ` + err.message));
                 return false;
-            } else {
+            } else {            	
                 log.info('Number of records deleted: ' + results.affectedRows);
-                log.log_entry(conn, sequence, module_name, '1', sour_db);
+                log.log_entry(conn, sequence, module_name, '1', sour_db,sel_duration,del_duration);
                 resolve(true);
             }
         });

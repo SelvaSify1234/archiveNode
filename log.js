@@ -24,18 +24,17 @@ module.exports = {
         });
 
         //create a logger file
-        console.log('create a logger file');
         log = require('simple-node-logger').createSimpleLogger(file_name);
         log.info('subscription to ', 'channel', ' accepted at .. ', new Date().toJSON());
         return true;
     },
 
-    log_entry: function log_entry(conn, sequence, module_name, status, sour_db) {
+    log_entry: function log_entry(conn, sequence, module_name, status, sour_db,sel_duration,del_duration) {
         return new Promise((rs, rj) => {
             var dt = datetime.create();
             var formatted = dt.format('Y-m-d:H:M:S');
 
-            var sql = `insert into ${sour_db}.archival_status_log (vt_tabid,module_name,status,process_date) values(${sequence},'${module_name}',${status},'${formatted}')`;
+            var sql = `insert into ${sour_db}.archival_status_log (vt_tabid,module_name,status,process_date,sel_duration,del_duration) values(${sequence},'${module_name}',${status},'${formatted}','${sel_duration}','${del_duration}')`;
 
             conn.query(sql, function (err, result, fields) {
                 if (err || !result) {

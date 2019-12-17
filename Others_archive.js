@@ -3,6 +3,7 @@ var log = require('./log');
 var sel_query;
 var insert_columns;
 var tbl_columns;
+global.sel_duration='';
 
 async function do_archive(sour_con, dest_con, create_table, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, rela_tables, condition) {
   return new Promise((resolve, reject) => {
@@ -16,12 +17,11 @@ async function do_archive(sour_con, dest_con, create_table, sour_db, dest_db, so
               if (dest_rst) {
                 if (rela_tables != null && rela_tables != '') sql = `Select * from ${sour_table}, ${rela_tables} where ${condition}`;
                 else sql = `Select * from ${sour_db}.${sour_table} where ${condition}`;
-                console.log(sql);
                 import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sql)
                   .then(rst => {
                     if (rst) {
                       sql = ` Delete from ${sour_db}.${sour_table} where ${condition}`;
-                      resolve(common.delete_data(sour_con, sql, 0, sour_table, sour_db)
+                      resolve(common.delete_data(sour_con, sql, 0, sour_table, sour_db,sel_duration)
                         .catch(err => {
                           reject(new Error(`Error while delete source table data. Err Msg : ` + err.message));
                           return false;
@@ -44,12 +44,11 @@ async function do_archive(sour_con, dest_con, create_table, sour_db, dest_db, so
                         if (stat) {
                           if (rela_tables != null && rela_tables != '') sql = `Select * from ${sour_table}, ${rela_tables} where ${condition}`;
                           else sql = `Select * from ${sour_db}.${sour_table} where ${condition}`;
-                          console.log(sql);
                           import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sql)
                             .then(rst => {
                               if (rst) {
                                 sql = ` Delete from ${sour_db}.${sour_table} where ${condition}`;
-                                resolve(common.delete_data(sour_con, sql, 0, sour_table, sour_db)
+                                resolve(common.delete_data(sour_con, sql, 0, sour_table, sour_db,sel_duration)
                                   .catch(err => {
                                     reject(new Error(`Error while delete source table data. Err Msg : ` + err.message));
                                     return false;
@@ -84,11 +83,17 @@ function import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest
   /* If Source & Destination host and port is different */
   if (sour_host == dest_host && sour_port == dest_port) {
     return new Promise((resolve, reject) => {
+    	var pre_query = new Date().getTime();
       sour_con.query(sel_query, function (err, result, fields) {
+            /* Query Execution Time Check */
+           var post_query = new Date().getTime();
+           sel_duration='';
+           sel_duration = (post_query - pre_query) / 1000;
+
         if (err || !result) {
           reject(new Error(`Error while get data from source table. Err Msg : ` + err.message));
           return false;
-        } else {
+        } else {        
           return get_table_columns(sour_con, sour_db, sour_table)
             .then(rst => {
               if (rst) {
