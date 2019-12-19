@@ -107,7 +107,7 @@ app.post('/db/archive-manual', function (req, res, next) {
                       msg += ' Row No :' + index + '  ' + err.message;
                       log.error(err.message);
                       log.error('\n----------------------\n');
-                      log.log_entry(sour_con, sequence, module_name, '2', sour_db, null, null);
+                      log.log_entry(sour_con, sequence, module_name, '2', sour_db, null, null,null);
                       if (err.message != null && index == result.length - 1) {
                         res.setHeader('Content-Type', 'application/json');
                         res.send({ message: msg });
@@ -122,7 +122,7 @@ app.post('/db/archive-manual', function (req, res, next) {
               log.error('\n----------------------\n');
               log.error(err.message);
               log.error('\n----------------------\n');
-              if (sequence != 0) log.log_entry(sour_con, sequence, module_name, '2', sour_db, null, null);
+              if (sequence != 0) log.log_entry(sour_con, sequence, module_name, '2', sour_db, null, null,null);
               res.setHeader('Content-Type', 'application/json');
               res.send({ message: err.message });
               res.end();
@@ -163,7 +163,7 @@ app.post('/db/archive-manual', function (req, res, next) {
                 msg += ' Row No :' + index + '  ' + err.message;
                 log.error(err.message);
                 log.error('\n----------------------\n');
-                log.log_entry(sour_con, 0, sour_table, '2', sour_db, null, null);
+                log.log_entry(sour_con, 0, sour_table, '2', sour_db, null, null,null);
                 if (err.message != null && index == tblkeys.length - 1) {
                   res.setHeader('Content-Type', 'application/json');
                   res.send({ message: msg });
