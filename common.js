@@ -1,5 +1,6 @@
 var log = require('./log');
 var del_duration;
+
 async function table_exists(conn, dest_db, name) {
   var sql = `SELECT count(*) FROM information_schema.tables WHERE table_schema = '${dest_db}' AND table_name = '${name}'`;
   return new Promise((resolve, reject) => {
@@ -17,6 +18,7 @@ async function table_exists(conn, dest_db, name) {
     });
   });
 }
+
 async function get_table_schema(conn, name, dest_table) {
   return new Promise((resolve, reject) => {
     conn.query(`SHOW CREATE TABLE ${name}`, function (err, results, fields) {
@@ -47,6 +49,7 @@ async function get_table_schema(conn, name, dest_table) {
     });
   });
 }
+
 async function import_table_schema(conn, schema) {
   return new Promise((resolve, reject) => {
     conn.query(schema, function (err, results, fields) {
@@ -89,4 +92,5 @@ function delete_data(conn, del_query, sequence, module_name, sour_db, sel_durati
 function replace_all(originalString, find, replace) {
   return originalString.replace(new RegExp(find, 'g'), replace);
 }
+
 module.exports = { table_exists, get_table_schema, import_table_schema, delete_data, replace_all }

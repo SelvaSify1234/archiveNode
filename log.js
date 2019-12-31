@@ -21,10 +21,8 @@ module.exports = {
          log.info(file_name + ' Log file has created !');
       });
       //create a logger file
-      log = require('simple-node-logger')
-         .createSimpleLogger(file_name);
-      log.info('subscription to ', 'channel', ' accepted at .. ', new Date()
-         .toJSON());
+      log = require('simple-node-logger').createSimpleLogger(file_name);
+      log.info('subscription to ', 'channel', ' accepted at .. ', new Date().toJSON());
       return true;
    },
     log_entry: function log_entry(conn, sequence, module_name, status, sour_db, sel_duration, del_duration, rows) {
