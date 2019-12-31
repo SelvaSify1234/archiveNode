@@ -146,7 +146,7 @@ async function source_conn(sour_con, dest_con) {
 
 async function get_sales_data(sour_con, name, sour_db) {
   return new Promise((rs, rj) => {
-    var sql = 'select * from sify_darc_modules_query  order by sequence asc LIMIT 20';
+    var sql = 'select * from sify_darc_modules_query  order by sequence asc ';
     //var sql = 'select * from sify_darc_modules_query  order by sequence asc LIMIT 10';
     sour_con.query(sql, function (err, result, fields) {
       if (err || !result.length > 0) {
