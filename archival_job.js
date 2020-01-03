@@ -146,8 +146,8 @@ async function source_conn(sour_con, dest_con) {
 
 async function get_sales_data(sour_con, name, sour_db) {
   return new Promise((rs, rj) => {
-    var sql = 'select * from sify_darc_modules_query  order by sequence asc ';
-    //var sql = 'select * from sify_darc_modules_query  order by sequence asc LIMIT 10';
+   // var sql = 'select * from sify_darc_modules_query  order by sequence asc ';
+    var sql = 'select * from sify_darc_modules_query  order by sequence asc LIMIT 10';
     sour_con.query(sql, function (err, result, fields) {
       if (err || !result.length > 0) {
         rj(new Error('Module Name is not valid. Module Name data not exist. '));

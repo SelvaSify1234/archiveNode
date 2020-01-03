@@ -78,12 +78,13 @@ app.post('/db/archive-manual', function (req, res, next) {
                   sel_query = item['sel_query_template'];
                   del_query = item['del_query_template'];
                   sequence = item['vt_tabid'];
-                  sour_table = sel_query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
+                  var str = sel_query.match(/WHERE\b/);
+                  var query = sel_query.slice(0,str.index+5);
+                  sour_table =query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
                   sour_table = sour_table.replace(/\s/g, "");
-                  sel_query = sel_query.replace(";", "");
                   dest_table = sour_table + '_archival';
                   /* Do Archive */
-                  archive.do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, sequence)
+                  archive.do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, item['vt_tabid'])
                     .then(stat => {
                       if (stat) {
                         log.info('Data Archive has been done.');
@@ -107,7 +108,7 @@ app.post('/db/archive-manual', function (req, res, next) {
                       msg += ' Row No :' + index + '  ' + err.message;
                       log.error(err.message);
                       log.error('\n----------------------\n');
-                      log.log_entry(sour_con, sequence, module_name, '2', sour_db, null, null,null);
+                      log.log_entry(sour_con, item['vt_tabid'], module_name, '2', sour_db, null, null,null);
                       if (err.message != null && index == result.length - 1) {
                         res.setHeader('Content-Type', 'application/json');
                         res.send({ message: msg });
@@ -122,7 +123,7 @@ app.post('/db/archive-manual', function (req, res, next) {
               log.error('\n----------------------\n');
               log.error(err.message);
               log.error('\n----------------------\n');
-              if (sequence != 0) log.log_entry(sour_con, sequence, module_name, '2', sour_db, null, null,null);
+              if (sequence != 0) log.log_entry(sour_con, item['vt_tabid'], module_name, '2', sour_db, null, null,null);
               res.setHeader('Content-Type', 'application/json');
               res.send({ message: err.message });
               res.end();
