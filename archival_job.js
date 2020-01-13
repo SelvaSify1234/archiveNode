@@ -82,9 +82,7 @@ async function archive_job()
                   var str = sel_query.match(/WHERE\b/);
                   var query = sel_query.slice(0,str.index+5);
                   sour_table =query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
-                  //sour_table = sel_query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
                   sour_table = sour_table.replace(/\s/g, "");
-                  //sel_query = sel_query.replace(";", "");
                   dest_table = sour_table + '_archival';
                   /* Do Archive */
                   archive.do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, item['vt_tabid'])
@@ -146,12 +144,11 @@ async function source_conn(sour_con, dest_con) {
 
 async function get_sales_data(sour_con, name, sour_db) {
   return new Promise((rs, rj) => {
-   // var sql = 'select * from sify_darc_modules_query  order by sequence asc ';
-    var sql = 'select * from sify_darc_modules_query  order by sequence asc LIMIT 10';
+    var sql = 'select * from sify_darc_modules_query  order by sequence asc ';
     sour_con.query(sql, function (err, result, fields) {
       if (err || !result.length > 0) {
-        rj(new Error('Module Name is not valid. Module Name data not exist. '));
-        log.info('Module Name is not valid. Module Name data not exist');
+        rj(new Error('No data available for archival. '));
+        log.info('No data available for archival.');
         return false;
       }
       else {
