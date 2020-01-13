@@ -25,11 +25,11 @@ module.exports = {
       log.info('subscription to ', 'channel', ' accepted at .. ', new Date().toJSON());
       return true;
    },
-    log_entry: function log_entry(conn, sequence, module_name, status, sour_db, sel_duration, del_duration, rows) {
+    log_entry: function log_entry(conn, sequence, module_name, status, sour_db, sel_duration, del_duration, rows,err) {
       return new Promise((rs, rj) => {
          var dt = datetime.create();
          var formatted = dt.format('Y-m-d:H:M:S');
-         var sql = `insert into ${sour_db}.archival_status_log (vt_tabid,module_name,status,process_date,sel_duration,del_duration,affected_rows) values(${sequence},'${module_name}',${status},'${formatted}','${sel_duration}','${del_duration}','${rows}')`;
+         var sql = `insert into ${sour_db}.archival_status_log (vt_tabid,module_name,status,process_date,sel_duration,del_duration,affected_rows,err_msg) values(${sequence},'${module_name}',${status},'${formatted}','${sel_duration}','${del_duration}','${rows}','${err}')`;
          conn.query(sql, function (err, result, fields) {
             if (err || !result) {
                console.log(err);
