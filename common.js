@@ -1,6 +1,7 @@
 var log = require('./log');
 var del_duration;
 
+
 async function table_exists(conn, dest_db, name) {
   var sql = `SELECT count(*) FROM information_schema.tables WHERE table_schema = '${dest_db}' AND table_name = '${name}'`;
   return new Promise((resolve, reject) => {
@@ -82,7 +83,8 @@ function delete_data(conn, del_query, sequence, module_name, sour_db, sel_durati
       }
       else {
         log.info('Number of records deleted: ' + results.affectedRows);
-        log.log_entry(conn, sequence, module_name, '1', sour_db, sel_duration, del_duration, results.affectedRows);
+        var msg='Data Archive has been done';
+        log.log_entry(conn, sequence, module_name, '1', sour_db, sel_duration, del_duration, results.affectedRows,msg);
         resolve(true);
       }
     });
