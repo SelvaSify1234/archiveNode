@@ -44,24 +44,24 @@ async function archive_job()
 {
   log.create_log();
   sour_con = mysql.createConnection({
-    host: '127.0.0.1'
-    , user: 'root'
-    , password: 'support2019'
-    , database: 'suns0018'
+    host: 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com'
+    , user: 'GSKL2018'
+    , password: 'GSKL2018'
+    , database: 'GSKL2018'
   });
   dest_con = mysql.createConnection({
-    host: '127.0.0.1'
-    , user: 'root'
-    , password:'support2019'
-    , database:'world'
+    host: 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com'
+    , user: 'GSKL2018'
+    , password:'GSKL2018'
+    , database:'GSKL2018'
   });
   customer_type = '1';
-  sour_host = '127.0.0.1';
-  dest_host = '127.0.0.1';
-  sour_db = 'suns0018';
-  dest_db = 'world';
-  sour_port = '3307';
-  dest_port = '3307';
+  sour_host = 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com';
+  dest_host = 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com';
+  sour_db = 'GSKL2018';
+  dest_db = 'GSKL2018';
+  sour_port = '3306';
+  dest_port = '3306';
   create_table = true;
   module_name = 'All';
 
@@ -79,11 +79,12 @@ async function archive_job()
                   sel_query = item['sel_query_template'];
                   del_query = item['del_query_template'];
                   sequence = item['vt_tabid'];
-                  var str = sel_query.match(/WHERE\b/);
-                  var query = sel_query.slice(0,str.index+5);
+                  var sel_query_uc = sel_query.toUpperCase();
+                  var str = sel_query_uc.match(/WHERE\b/);
+                  var query = sel_query_uc.slice(0,str.index+5);
                   sour_table =query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
                   sour_table = sour_table.replace(/\s/g, "");
-                  dest_table = sour_table + '_archival';
+                  dest_table = sour_table + '_ARCHIVAL';
                   /* Do Archive */
                   archive.do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, item['vt_tabid'])
                     .then(stat => {
@@ -145,6 +146,7 @@ async function source_conn(sour_con, dest_con) {
 async function get_sales_data(sour_con, name, sour_db) {
   return new Promise((rs, rj) => {
     var sql = 'select * from sify_darc_modules_query  order by sequence asc ';
+   // var sql = 'select * from sify_darc_modules_query  where id=2185 ';
     sour_con.query(sql, function (err, result, fields) {
       if (err || !result.length > 0) {
         rj(new Error('No data available for archival. '));

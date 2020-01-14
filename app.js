@@ -78,11 +78,12 @@ app.post('/db/archive-manual', function (req, res, next) {
                   sel_query = item['sel_query_template'];
                   del_query = item['del_query_template'];
                   sequence = item['vt_tabid'];
-                  var str = sel_query.match(/WHERE\b/);
-                  var query = sel_query.slice(0,str.index+5);
+                  var sel_query_uc = sel_query.toUpperCase();
+                  var str = sel_query_uc.match(/WHERE\b/);
+                  var query = sel_query_uc.slice(0,str.index+5);
                   sour_table =query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
                   sour_table = sour_table.replace(/\s/g, "");
-                  dest_table = sour_table + '_archival';
+                  dest_table = sour_table + '_ARCHIVAL';
                   /* Do Archive */
                   archive.do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, item['vt_tabid'])
                     .then(stat => {

@@ -44,7 +44,7 @@ async function get_table_schema(conn, name, dest_table) {
           resolve(schema);
         }
         else {
-          resolve(schema = schema.replace(name, dest_table));
+          resolve(schema = schema.replace(name.toLowerCase(), dest_table));
         }
       }
     });
