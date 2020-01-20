@@ -85,7 +85,7 @@ async function archive_job()
                   sour_table = sour_table.replace(/\s/g, "");
                   dest_table = sour_table + '_archival';
                   /* Do Archive */
-                  archive.do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, item['vt_tabid'])
+                  archive.do_archive(sour_con, dest_con, create_table, item['module_name'], sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, item['vt_tabid'])
                     .then(stat => {
                       if (stat) {
                         log.info( ' Row No :' + index + '  ' + ' Data Archive has been done.');
@@ -98,7 +98,7 @@ async function archive_job()
                       log.error('\n----------------------\n');
                       log.error(' Row No :' + index + '  ' + err.message);
                       log.error('\n----------------------\n');
-                      log.log_entry(sour_con, item['vt_tabid'], module_name, '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''));
+                      log.log_entry(sour_con, item['vt_tabid'], item['module_name'], '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''));
                     });
                 });
               }
@@ -107,7 +107,7 @@ async function archive_job()
               log.error('\n----------------------\n');
               log.error(' Row No :' + index + '  ' + err.message);
               log.error('\n----------------------\n');
-              if (sequence != 0) log.log_entry(sour_con, item['vt_tabid'], module_name, '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''));
+              if (sequence != 0) log.log_entry(sour_con, item['vt_tabid'], item['module_name'], '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''));
             });
         }}
     })
@@ -145,7 +145,6 @@ async function source_conn(sour_con, dest_con) {
 async function get_sales_data(sour_con, name, sour_db) {
   return new Promise((rs, rj) => {
     var sql = 'select * from sify_darc_modules_query  order by sequence asc ';
-   // var sql = 'select * from sify_darc_modules_query  where id=2185 ';
     sour_con.query(sql, function (err, result, fields) {
       if (err || !result.length > 0) {
         rj(new Error('No data available for archival. '));
