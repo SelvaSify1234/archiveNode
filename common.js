@@ -38,10 +38,11 @@ async function get_table_schema(conn, name, dest_table) {
           for_key = foreign_key[1].replace(/\s/g, "");
           for_key = for_key.replace(/`/gi, "");
           /*For Others Module*/
-          //schema = schema.replace(for_key, for_key+'_archival');
-          schema = schema.replace(for_key, dest_table + 'Id' + '_archival');
-          schema = schema.replace(name, dest_table);
-          resolve(schema);
+          //schema = schema.replace(for_key, for_key+'_archival');         
+         // schema = schema.replace(for_key, dest_table + 'Id' + '_archival');
+         // schema = schema.replace(name, dest_table);
+         schema =replace_all(schema,name,dest_table);
+         resolve(schema);
         }
         else {
           resolve(schema = schema.replace(name, dest_table));

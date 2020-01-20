@@ -3,6 +3,7 @@ var common = require('./common');
 var insert_columns;
 var tbl_columns;
 global.sel_duration = '';
+global.aff_row='';
 
 async function do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, sequence) {
   return new Promise((resolve, reject) => {
@@ -21,6 +22,7 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
             })
             .catch(err => {
               //log.error(err.message);
+              log.log_entry(sour_con, sequence, module_name, '2', sour_db, sel_duration, 0,aff_row, err.message.replace(/[^\w\s]/gi, ''));
               reject(new Error(err.message));
               return false;
             });
@@ -43,6 +45,7 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                       })
                       .catch(err => {
                         //log.error(err.message);
+                        log.log_entry(sour_con,sequence, module_name, '2', sour_db, sel_duration, 0,aff_row, err.message.replace(/[^\w\s]/gi, ''));
                         reject(new Error(err.message));
                         return false;
                       });
@@ -50,12 +53,14 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                 })
                 .catch(err => {
                  // log.error(err.message);
+                 log.log_entry(sour_con, sequence, module_name, '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''));
                   reject(new Error(err.message));
                   return false;
                 });
             })
             .catch(err => {
              // log.error(err.message);
+             log.log_entry(sour_con, sequence, module_name, '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''));
               reject(new Error(err.message));
               return false;
             });
@@ -99,6 +104,7 @@ function import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest
       sour_con.query(sel_query, function (err, result, fields) {
         /* Query Execution Time Check */
         var post_query = new Date().getTime();
+        aff_row='';
         sel_duration = '';
         sel_duration = (post_query - pre_query) / 1000;
         if (err || !result) {
@@ -125,7 +131,8 @@ function import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest
                       return false;
                     }
                     else {
-                      log.info('Number of records inserted: ' + result.affectedRows);
+                      aff_row=result.affectedRows;
+                      log.info(`Number of records inserted:  ${aff_row}`);
                       resolve(true);
                     }
                   });
