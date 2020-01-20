@@ -43,50 +43,27 @@ archive_job();
 async function archive_job()
 {
   log.create_log();
-  // sour_con = mysql.createConnection({
-  //   host: 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com'
-  //   , user: 'GSKL2018'
-  //   , password: 'GSKL2018'
-  //   , database: 'GSKL2018'
-  // });
-  // dest_con = mysql.createConnection({
-  //   host: 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com'
-  //   , user: 'GSKL2018'
-  //   , password:'GSKL2018'
-  //   , database:'GSKL2018'
-  // });
-  // customer_type = '1';
-  // sour_host = 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com';
-  // dest_host = 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com';
-  // sour_db = 'GSKL2018';
-  // dest_db = 'GSKL2018';
-  // sour_port = '3306';
-  // dest_port = '3306';
-  // create_table = true;
-  // module_name = 'All';
-
-sour_con = mysql.createConnection({
-    host: '127.0.0.1'
-    , user: 'root'
-    , password: 'support2019'
-    , database: 'suns0018'
+  sour_con = mysql.createConnection({
+    host: 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com'
+    , user: 'GSKL2018'
+    , password: 'GSKL2018'
+    , database: 'GSKL2018'
   });
   dest_con = mysql.createConnection({
-    host: '127.0.0.1'
-    , user: 'root'
-    , password:'support2019'
-    , database:'world_new'
+    host: 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com'
+    , user: 'GSKL2018'
+    , password:'GSKL2018'
+    , database:'GSKL2018'
   });
   customer_type = '1';
-  sour_host = '127.0.0.1';
-  dest_host = '127.0.0.1';
-  sour_db = 'suns0018';
-  dest_db = 'world_new';
-  sour_port = '3307';
-  dest_port = '3307';
+  sour_host = 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com';
+  dest_host = 'forumnxt-data-archival.cjujx2esp70l.ap-south-1.rds.amazonaws.com';
+  sour_db = 'GSKL2018';
+  dest_db = 'GSKL2018';
+  sour_port = '3306';
+  dest_port = '3306';
   create_table = true;
   module_name = 'All';
-
 
   source_conn(sour_con, dest_con)
     .then(rst => {
@@ -106,7 +83,7 @@ sour_con = mysql.createConnection({
                   var query = sel_query.slice(0,str.index+5);
                   sour_table =query.match(new RegExp('FROM' + "(.*)" + 'WHERE'))[1];
                   sour_table = sour_table.replace(/\s/g, "");
-                  dest_table = sour_table + '_archival';
+                  dest_table = sour_table + '_arch';
                   /* Do Archive */
                   archive.do_archive(sour_con, dest_con, create_table, item['module_name'], sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, item['vt_tabid'])
                     .then(stat => {
