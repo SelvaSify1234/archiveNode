@@ -71,7 +71,7 @@ async function import_table_schema(conn, schema) {
   });
 }
 
-function delete_data(conn, del_query, sequence, module_name, sour_db, sel_duration) {
+function delete_data(conn, del_query, sequence, module_name, sour_db, sel_duration,st_time,end_time,sel_query) {
   return new Promise((resolve, reject) => {
     var pre_query = new Date().getTime();
     conn.query(del_query, function (err, results, fields) {
@@ -85,7 +85,7 @@ function delete_data(conn, del_query, sequence, module_name, sour_db, sel_durati
       else {
         log.info('Number of records deleted: ' + results.affectedRows);
         var msg='Data Archive has been done';
-        log.log_entry(conn, sequence, module_name, '1', sour_db, sel_duration, del_duration, results.affectedRows,msg);
+        log.log_entry(conn, sequence, module_name, '1', sour_db, sel_duration, del_duration, results.affectedRows,msg,st_time,end_time,pre_query,post_query,sel_query,del_query);
         resolve(true);
       }
     });

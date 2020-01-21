@@ -25,11 +25,13 @@ module.exports = {
       log.info('subscription to ', 'channel', ' accepted at .. ', new Date().toJSON());
       return true;
    },
-    log_entry: function log_entry(conn, sequence, module_name, status, sour_db, sel_duration, del_duration, rows,err) {
+    log_entry: function log_entry(conn, sequence, module_name, status, sour_db, sel_duration, del_duration, rows,err,st_time,end_time,pre_query,post_query,sel_query,del_query) {
       return new Promise((rs, rj) => {
          var dt = datetime.create();
          var formatted = dt.format('Y-m-d:H:M:S');
-         var sql = `insert into ${sour_db}.archival_status_log (vt_tabid,module_name,status,process_date,sel_duration,del_duration,affected_rows,err_msg) values(${sequence},'${module_name}',${status},'${formatted}','${sel_duration}','${del_duration}','${rows}','${err}')`;
+         sel_query = sel_query.replace(/'/gi, '');
+         del_query = del_query.replace(/'/gi, '');
+         var sql = `insert into ${sour_db}.archival_status_log (vt_tabid,module_name,status,process_date,insert_duration,del_duration,affected_rows,err_msg,ins_st_time,ins_end_time,del_st_time,del_end_time,sel_query,del_query) values(${sequence},'${module_name}',${status},'${formatted}','${sel_duration}','${del_duration}','${rows}','${err}','${st_time}','${end_time}','${pre_query}','${post_query}','${sel_query}','${del_query}')`;
          conn.query(sql, function (err, result, fields) {
             if (err || !result) {
                console.log(err);

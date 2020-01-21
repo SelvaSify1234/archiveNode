@@ -1,9 +1,12 @@
 var log = require('./log');
 var common = require('./common');
+var datetime = require('node-datetime');
 var insert_columns;
 var tbl_columns;
 global.sel_duration = '';
 global.aff_row='';
+var ins_st_time;
+var ins_end_time;
 
 async function do_archive(sour_con, dest_con, create_table, module_name, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query, del_query, sequence) {
   return new Promise((resolve, reject) => {
@@ -13,7 +16,7 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
           return import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query)
             .then(result => {
               if (result) {
-                resolve(common.delete_data(sour_con, del_query, sequence, module_name, sour_db, sel_duration));
+                resolve(common.delete_data(sour_con, del_query, sequence, module_name, sour_db, sel_duration,ins_st_time,ins_end_time,sel_query));
               }
               else {
                 reject(new Error(`Selected Module name do not have data to archival.`));
@@ -22,7 +25,7 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
             })
             .catch(err => {
               //log.error(err.message);
-              log.log_entry(sour_con, sequence, module_name, '2', sour_db, sel_duration, 0,aff_row, err.message.replace(/[^\w\s]/gi, ''));
+              log.log_entry(sour_con, sequence, module_name, '2', sour_db, sel_duration, 0,aff_row, err.message.replace(/[^\w\s]/gi, ''),ins_st_time,ins_end_time,'0000-00-00 00:00:00','0000-00-00 00:00:00',sel_query,del_query);
               reject(new Error(err.message));
               return false;
             });
@@ -36,7 +39,7 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                     return import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest_host, sour_port, dest_port, sour_table, dest_table, sel_query)
                       .then(rst => {
                         if (rst) {
-                          resolve(common.delete_data(sour_con, del_query, sequence, module_name, sour_db, sel_duration));
+                          resolve(common.delete_data(sour_con, del_query, sequence, module_name, sour_db, sel_duration,ins_st_time,ins_end_time,sel_query));
                         }
                         else {
                           reject(new Error(`Selected Module name do not have data to archival.`));
@@ -45,7 +48,7 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                       })
                       .catch(err => {
                         //log.error(err.message);
-                        log.log_entry(sour_con,sequence, module_name, '2', sour_db, sel_duration, 0,aff_row, err.message.replace(/[^\w\s]/gi, ''));
+                         log.log_entry(sour_con, sequence, module_name, '2', sour_db, sel_duration, 0,aff_row, err.message.replace(/[^\w\s]/gi, ''),ins_st_time,ins_end_time,'0000-00-00 00:00:00','0000-00-00 00:00:00',sel_query,del_query);
                         reject(new Error(err.message));
                         return false;
                       });
@@ -53,14 +56,14 @@ async function do_archive(sour_con, dest_con, create_table, module_name, sour_db
                 })
                 .catch(err => {
                  // log.error(err.message);
-                 log.log_entry(sour_con, sequence, module_name, '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''));
+                 log.log_entry(sour_con, sequence, module_name, '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''),ins_st_time,ins_end_time,'0000-00-00 00:00:00','0000-00-00 00:00:00',sel_query,del_query);
                   reject(new Error(err.message));
                   return false;
                 });
             })
             .catch(err => {
              // log.error(err.message);
-             log.log_entry(sour_con, sequence, module_name, '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''));
+             log.log_entry(sour_con, sequence, module_name, '2', sour_db, 0, 0,0, err.message.replace(/[^\w\s]/gi, ''),null,null,null,null,sel_query,del_query);
               reject(new Error(err.message));
               return false;
             });
@@ -101,12 +104,16 @@ function import_table_data(sour_con, dest_con, sour_db, dest_db, sour_host, dest
   if (sour_host == dest_host && sour_port == dest_port) {
     return new Promise((resolve, reject) => {
       var pre_query = new Date().getTime();
+      var dt = datetime.create();
+      ins_st_time = dt.format('Y-m-d:H:M:S');   
       sour_con.query(sel_query, function (err, result, fields) {
         /* Query Execution Time Check */
         var post_query = new Date().getTime();
         aff_row='';
-        sel_duration = '';
+        sel_duration = '';                    
         sel_duration = (post_query - pre_query) / 1000;
+        var dt_end = datetime.create();
+        ins_end_time = dt_end.format('Y-m-d:H:M:S');  
         if (err || !result) {
           reject(new Error(`Error while get data from source table. Err Msg : ` + err.message));
           return false;
