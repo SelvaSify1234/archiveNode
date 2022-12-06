@@ -22,7 +22,7 @@
     "mysql-import": "^3.0.6",
     "node-datetime": "^2.1.2",
     "node-file-logger": "^0.9.5",
-    "qs": "^6.9.0",
+    "qs": "^6.9.7",
     "request": "^2.88.0",
     "simple-node-logger": "^18.12.23",
     "winston": "^3.2.1"
